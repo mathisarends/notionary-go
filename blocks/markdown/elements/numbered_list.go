@@ -1,30 +1,22 @@
-package markdown
+package elements
 
 import (
-	"regexp"
-
 	"github.com/mathisbot/notionary-go/blocks"
+	syntax "github.com/mathisbot/notionary-go/blocks/markdown/syntax"
 )
 
-const numberedListPlaceholder = "__NUM__"
+type NumberedListCodec struct{}
 
-var numberedListPattern = regexp.MustCompile(`^(\s*)(\d+)\.\s+(.+)$`)
-
-type NumberedListParser struct {
-	BaseParser
-	pattern *regexp.Regexp
-}
-
-type NumberedListRenderer struct {
-}
-
-func (p *NumberedListParser) Parse(line string) (any, bool) {
-	m := p.pattern.FindStringSubmatch(line)
-	if m == nil {
-		return p.Next(line)
+func (c *NumberedListCodec) Parse(line string) (blocks.Block, bool) {
+	syn, ok := syntax.Registry[syntax.NumberedList].(syntax.SimpleSyntax)
+	if !ok {
+		return nil, false
 	}
-
-	return blocks.NumberedListItemBlock{
+	m := syn.Pattern.FindStringSubmatch(line)
+	if m == nil {
+		return nil, false
+	}
+	return &blocks.NumberedListItemBlock{
 		BaseBlock: blocks.BaseBlock{Type: blocks.BlockTypeNumberedListItem},
 		NumberedListItem: blocks.ListItemData{
 			RichText: toRichText(m[3]),
@@ -33,21 +25,14 @@ func (p *NumberedListParser) Parse(line string) (any, bool) {
 	}, true
 }
 
-func NewNumberedListParser(pattern *regexp.Regexp) *NumberedListParser {
-	if pattern == nil {
-		pattern = numberedListPattern
-	}
-	return &NumberedListParser{pattern: pattern}
-}
-
-func renderNumberedListItem(block *blocks.NumberedListItemBlock) string {
-	return numberedListPlaceholder + ". " + plainText(block.NumberedListItem.RichText)
-}
-
-func (r *NumberedListRenderer) Render(block blocks.Block) (string, bool) {
+func (c *NumberedListCodec) Render(block blocks.Block) (string, bool) {
 	b, ok := block.(*blocks.NumberedListItemBlock)
 	if !ok {
 		return "", false
 	}
-	return renderNumberedListItem(b), true
+	syn, ok := syntax.Registry[syntax.NumberedList].(syntax.SimpleSyntax)
+	if !ok {
+		return "", false
+	}
+	return syn.StartDelimiter + toMarkdown(b.NumberedListItem.RichText), true
 }
