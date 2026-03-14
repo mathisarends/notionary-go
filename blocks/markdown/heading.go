@@ -11,25 +11,19 @@ type HeadingParser struct {
 }
 
 func (p *HeadingParser) Parse(line string) (any, bool) {
-	if strings.HasPrefix(line, "### ") {
+	if text, ok := strings.CutPrefix(line, "### "); ok {
 		return blocks.Heading3Block{
-			Heading3: blocks.HeadingData{
-				RichText: toRichText(strings.TrimPrefix(line, "### ")),
-			},
+			Heading3: blocks.HeadingData{RichText: toRichText(text)},
 		}, true
 	}
-	if strings.HasPrefix(line, "## ") {
+	if text, ok := strings.CutPrefix(line, "## "); ok {
 		return blocks.Heading2Block{
-			Heading2: blocks.HeadingData{
-				RichText: toRichText(strings.TrimPrefix(line, "## ")),
-			},
+			Heading2: blocks.HeadingData{RichText: toRichText(text)},
 		}, true
 	}
-	if strings.HasPrefix(line, "# ") {
+	if text, ok := strings.CutPrefix(line, "# "); ok {
 		return blocks.Heading1Block{
-			Heading1: blocks.HeadingData{
-				RichText: toRichText(strings.TrimPrefix(line, "# ")),
-			},
+			Heading1: blocks.HeadingData{RichText: toRichText(text)},
 		}, true
 	}
 	return p.Next(line)

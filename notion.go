@@ -5,12 +5,14 @@ import (
 	"github.com/mathisbot/notionary-go/datasource"
 	notionhttp "github.com/mathisbot/notionary-go/http"
 	"github.com/mathisbot/notionary-go/page"
+	"github.com/mathisbot/notionary-go/user"
 )
 
 type Client struct {
 	Pages       *page.Client
 	Databases   *database.Client
 	DataSources *datasource.Client
+	Users       *user.Client
 }
 
 func New(token string) *Client {
@@ -19,5 +21,6 @@ func New(token string) *Client {
 		Pages:       page.New(http),
 		Databases:   database.New(http),
 		DataSources: datasource.New(http),
+		Users:       user.New(http),
 	}
 }

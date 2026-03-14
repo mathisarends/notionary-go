@@ -21,6 +21,7 @@ func (c *Client) Get(ctx context.Context, id string) (*Page, error) {
 	if err := c.http.Get(ctx, "/pages/"+id, &page); err != nil {
 		return nil, err
 	}
+	page.http = c.http
 	return &page, nil
 }
 
