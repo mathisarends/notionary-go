@@ -11,6 +11,10 @@ type ParagraphBlock struct {
 	Paragraph ParagraphData `json:"paragraph"`
 }
 
+func (b *ParagraphBlock) RichTextRefs() []*[]RichText {
+	return []*[]RichText{&b.Paragraph.RichText}
+}
+
 type HeadingData struct {
 	RichText     []RichText `json:"rich_text"`
 	Color        BlockColor `json:"color"`
@@ -22,14 +26,26 @@ type Heading1Block struct {
 	Heading1 HeadingData `json:"heading_1"`
 }
 
+func (b *Heading1Block) RichTextRefs() []*[]RichText {
+	return []*[]RichText{&b.Heading1.RichText}
+}
+
 type Heading2Block struct {
 	BaseBlock
 	Heading2 HeadingData `json:"heading_2"`
 }
 
+func (b *Heading2Block) RichTextRefs() []*[]RichText {
+	return []*[]RichText{&b.Heading2.RichText}
+}
+
 type Heading3Block struct {
 	BaseBlock
 	Heading3 HeadingData `json:"heading_3"`
+}
+
+func (b *Heading3Block) RichTextRefs() []*[]RichText {
+	return []*[]RichText{&b.Heading3.RichText}
 }
 
 type CodeData struct {
@@ -43,6 +59,10 @@ type CodeBlock struct {
 	Code CodeData `json:"code"`
 }
 
+func (b *CodeBlock) RichTextRefs() []*[]RichText {
+	return []*[]RichText{&b.Code.RichText, &b.Code.Caption}
+}
+
 type ListItemData struct {
 	RichText []RichText `json:"rich_text"`
 	Color    BlockColor `json:"color"`
@@ -53,9 +73,17 @@ type BulletedListItemBlock struct {
 	BulletedListItem ListItemData `json:"bulleted_list_item"`
 }
 
+func (b *BulletedListItemBlock) RichTextRefs() []*[]RichText {
+	return []*[]RichText{&b.BulletedListItem.RichText}
+}
+
 type NumberedListItemBlock struct {
 	BaseBlock
 	NumberedListItem ListItemData `json:"numbered_list_item"`
+}
+
+func (b *NumberedListItemBlock) RichTextRefs() []*[]RichText {
+	return []*[]RichText{&b.NumberedListItem.RichText}
 }
 
 type QuoteData struct {
@@ -68,6 +96,10 @@ type QuoteBlock struct {
 	Quote QuoteData `json:"quote"`
 }
 
+func (b *QuoteBlock) RichTextRefs() []*[]RichText {
+	return []*[]RichText{&b.Quote.RichText}
+}
+
 type CalloutData struct {
 	RichText []RichText `json:"rich_text"`
 	Color    BlockColor `json:"color"`
@@ -76,6 +108,10 @@ type CalloutData struct {
 type CalloutBlock struct {
 	BaseBlock
 	Callout CalloutData `json:"callout"`
+}
+
+func (b *CalloutBlock) RichTextRefs() []*[]RichText {
+	return []*[]RichText{&b.Callout.RichText}
 }
 
 type ToggleData struct {
@@ -88,6 +124,10 @@ type ToggleBlock struct {
 	Toggle ToggleData `json:"toggle"`
 }
 
+func (b *ToggleBlock) RichTextRefs() []*[]RichText {
+	return []*[]RichText{&b.Toggle.RichText}
+}
+
 type ToDoData struct {
 	RichText []RichText `json:"rich_text"`
 	Checked  bool       `json:"checked"`
@@ -97,6 +137,10 @@ type ToDoData struct {
 type ToDoBlock struct {
 	BaseBlock
 	ToDo ToDoData `json:"to_do"`
+}
+
+func (b *ToDoBlock) RichTextRefs() []*[]RichText {
+	return []*[]RichText{&b.ToDo.RichText}
 }
 
 type DividerBlock struct {
@@ -122,9 +166,17 @@ type ImageBlock struct {
 	Image FileData `json:"image"`
 }
 
+func (b *ImageBlock) RichTextRefs() []*[]RichText {
+	return []*[]RichText{&b.Image.Caption}
+}
+
 type VideoBlock struct {
 	BaseBlock
 	Video FileData `json:"video"`
+}
+
+func (b *VideoBlock) RichTextRefs() []*[]RichText {
+	return []*[]RichText{&b.Video.Caption}
 }
 
 type TableData struct {
