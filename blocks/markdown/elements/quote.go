@@ -1,6 +1,8 @@
 package elements
 
 import (
+	"strings"
+
 	"github.com/mathisbot/notionary-go/blocks"
 	syntax "github.com/mathisbot/notionary-go/blocks/markdown/syntax"
 )
@@ -8,6 +10,10 @@ import (
 type QuoteCodec struct{}
 
 func (c *QuoteCodec) Parse(line string) (blocks.Block, bool) {
+	if strings.HasPrefix(strings.TrimSpace(line), ">>") {
+		return nil, false
+	}
+
 	syn, ok := syntax.Registry[syntax.Quote].(syntax.SimpleSyntax)
 	if !ok {
 		return nil, false

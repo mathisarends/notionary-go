@@ -87,13 +87,13 @@ var Registry = map[RegistryKey]Definition{
 	PDF:      SelfClosingTagSyntax{Tag: "<pdf", Pattern: regexp.MustCompile(`^<pdf\s+src="([^"]+)"(?:\s+caption="([^"]*)")?>\s*$`), Group: "Media", Example: `<pdf src="https://example.com/doc.pdf" caption="optional caption">`},
 	Embed:    SelfClosingTagSyntax{Tag: "<embed", Pattern: regexp.MustCompile(`^<embed\s+url="(https?://[^\s"]+)"(?:\s+title="([^"]*)")?>\s*$`), Group: "Links", Example: `<embed url="https://example.com/embed" title="optional title">`},
 
-	BulletedList: SimpleSyntax{StartDelimiter: "- ", Pattern: regexp.MustCompile(`^(\s*)-\s+(?!\[[ xX]\])(.+)$`), Group: "Lists", Example: "- First item\n- Second item\n  - Nested item"},
+	BulletedList: SimpleSyntax{StartDelimiter: "- ", Pattern: regexp.MustCompile(`^(\s*)-\s+(.+)$`), Group: "Lists", Example: "- First item\n- Second item\n  - Nested item"},
 	NumberedList: SimpleSyntax{StartDelimiter: "1. ", Pattern: regexp.MustCompile(`^(\s*)(\d+)\.\s+(.+)$`), Group: "Lists", Example: "1. First item\n2. Second item"},
 	ToDo:         SimpleSyntax{StartDelimiter: "- [ ]", Pattern: regexp.MustCompile(`^\s*-\s+\[ \]\s+(.+)$`), Group: "Lists", Example: "- [ ] Task to do"},
 	ToDoDone:     SimpleSyntax{StartDelimiter: "- [x]", Pattern: regexp.MustCompile(`(?i)^\s*-\s+\[x\]\s+(.+)$`), Group: "Lists", Example: "- [x] Completed task"},
 
 	Heading:         SimpleSyntax{StartDelimiter: "#", Pattern: regexp.MustCompile(`^(#{1,3})[ \t]+(.+)$`), Group: "Text", Example: "# Heading 1\n## Heading 2\n### Heading 3"},
-	Quote:           SimpleSyntax{StartDelimiter: "> ", Pattern: regexp.MustCompile(`^>(?!>)\s*(.+)$`), Group: "Text", Example: "> This is a blockquote."},
+	Quote:           SimpleSyntax{StartDelimiter: "> ", Pattern: regexp.MustCompile(`^>\s*(.+)$`), Group: "Text", Example: "> This is a blockquote."},
 	Divider:         SimpleSyntax{StartDelimiter: "---", Pattern: regexp.MustCompile(`^\s*-{3,}\s*$`), Group: "Text", Example: "---"},
 	Breadcrumb:      SimpleSyntax{StartDelimiter: "[breadcrumb]", Pattern: regexp.MustCompile(`(?i)^\[breadcrumb\]\s*$`), Group: "Text", Example: "[breadcrumb]"},
 	TableOfContents: SimpleSyntax{StartDelimiter: "[toc]", Pattern: regexp.MustCompile(`(?i)^\[toc\]$`), Group: "Text", Example: "[toc]"},
