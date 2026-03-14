@@ -1,0 +1,62 @@
+package blocks
+
+type BlockType string
+
+const (
+	BlockTypeParagraph        BlockType = "paragraph"
+	BlockTypeHeading1         BlockType = "heading_1"
+	BlockTypeHeading2         BlockType = "heading_2"
+	BlockTypeHeading3         BlockType = "heading_3"
+	BlockTypeBulletedListItem BlockType = "bulleted_list_item"
+	BlockTypeNumberedListItem BlockType = "numbered_list_item"
+	BlockTypeCode             BlockType = "code"
+	BlockTypeQuote            BlockType = "quote"
+	BlockTypeCallout          BlockType = "callout"
+	BlockTypeToDo             BlockType = "to_do"
+	BlockTypeToggle           BlockType = "toggle"
+	BlockTypeDivider          BlockType = "divider"
+	BlockTypeImage            BlockType = "image"
+	BlockTypeVideo            BlockType = "video"
+	BlockTypeAudio            BlockType = "audio"
+	BlockTypeFile             BlockType = "file"
+	BlockTypePdf              BlockType = "pdf"
+	BlockTypeBookmark         BlockType = "bookmark"
+	BlockTypeEmbed            BlockType = "embed"
+	BlockTypeEquation         BlockType = "equation"
+	BlockTypeTable            BlockType = "table"
+	BlockTypeTableRow         BlockType = "table_row"
+	BlockTypeTableOfContents  BlockType = "table_of_contents"
+	BlockTypeColumn           BlockType = "column"
+	BlockTypeColumnList       BlockType = "column_list"
+	BlockTypeChildPage        BlockType = "child_page"
+	BlockTypeChildDatabase    BlockType = "child_database"
+	BlockTypeSyncedBlock      BlockType = "synced_block"
+	BlockTypeLinkPreview      BlockType = "link_preview"
+	BlockTypeLinkToPage       BlockType = "link_to_page"
+	BlockTypeBreadcrumb       BlockType = "breadcrumb"
+	BlockTypeUnsupported      BlockType = "unsupported"
+)
+
+type BlockColor string
+
+const (
+	BlockColorDefault          BlockColor = "default"
+	BlockColorBlue             BlockColor = "blue"
+	BlockColorBrown            BlockColor = "brown"
+	BlockColorGray             BlockColor = "gray"
+	BlockColorGreen            BlockColor = "green"
+	BlockColorOrange           BlockColor = "orange"
+	BlockColorPink             BlockColor = "pink"
+	BlockColorPurple           BlockColor = "purple"
+	BlockColorRed              BlockColor = "red"
+	BlockColorYellow           BlockColor = "yellow"
+	BlockColorBlueBackground   BlockColor = "blue_background"
+	BlockColorBrownBackground  BlockColor = "brown_background"
+	BlockColorGrayBackground   BlockColor = "gray_background"
+	BlockColorGreenBackground  BlockColor = "green_background"
+	BlockColorOrangeBackground BlockColor = "orange_background"
+	BlockColorPinkBackground   BlockColor = "pink_background"
+	BlockColorPurpleBackground BlockColor = "purple_background"
+	BlockColorRedBackground    BlockColor = "red_background"
+	BlockColorYellowBackground BlockColor = "yellow_background"
+)

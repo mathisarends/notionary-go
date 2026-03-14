@@ -1,0 +1,14 @@
+# binaries
+*.exe
+*.out
+/bin/
+
+# env
+.env
+.env.*
+
+# test cache
+*.test
+
+# vendor (falls du mal nutzt)
+vendor/
