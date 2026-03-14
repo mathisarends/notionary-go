@@ -30,7 +30,7 @@ func (c *ColumnListCodec) Render(block blocks.Block) (string, bool) {
 	if !ok {
 		return "", false
 	}
-	return syn.OpenTag + ">", true
+	return syn.OpenTag, true
 }
 
 func (c *ColumnCodec) Parse(line string) (blocks.Block, bool) {

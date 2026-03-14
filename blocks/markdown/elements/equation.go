@@ -29,5 +29,5 @@ func (c *EquationCodec) Render(block blocks.Block) (string, bool) {
 	if !ok {
 		return "", false
 	}
-	return syn.OpenTag + ">", true
+	return syn.OpenTag, true
 }
