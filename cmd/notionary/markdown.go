@@ -7,19 +7,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var markdownCmd = &cobra.Command{
-	Use:   "markdown [lines...]",
-	Short: "Markdown-Zeilen parsen",
-	Args:  cobra.MinimumNArgs(1),
+var markdownSyntaxCmd = &cobra.Command{
+	Use:   "syntax",
+	Short: "Syntax-Referenz aller unterstützten Block-Typen ausgeben",
 	Run: func(cmd *cobra.Command, args []string) {
-		parser := markdown.NewLineParser()
-		for _, line := range args {
-			block, ok := parser.Parse(line)
-			if ok {
-				fmt.Printf("%-30s → %T\n", line, block)
-			} else {
-				fmt.Printf("%-30s → kein match\n", line)
-			}
-		}
+		fmt.Print(markdown.SyntaxGuide())
 	},
 }

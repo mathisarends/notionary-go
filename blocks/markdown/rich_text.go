@@ -1,13 +1,12 @@
 package markdown
 
-import "github.com/mathisbot/notionary-go/blocks"
+import (
+	"github.com/mathisbot/notionary-go/blocks"
+	richtext "github.com/mathisbot/notionary-go/blocks/rich_text"
+)
+
+var defaultRichTextConverter = richtext.NewDefaultConverter()
 
 func toRichText(text string) []blocks.RichText {
-	return []blocks.RichText{
-		{
-			Type: blocks.RichTextTypeText,
-			Text: &blocks.TextContent{Content: text},
-			PlainText: text,
-		},
-	}
+	return defaultRichTextConverter.ToRichText(text)
 }

@@ -3,7 +3,6 @@ package page
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/mathisbot/notionary-go/blocks"
 	"github.com/mathisbot/notionary-go/blocks/markdown"
@@ -11,12 +10,12 @@ import (
 )
 
 type Page struct {
-	ID             string                 `json:"id"`
-	Object         string                 `json:"object"`
-	CreatedTime    string                 `json:"created_time"`
-	LastEditedTime string                 `json:"last_edited_time"`
-	Archived       bool                   `json:"archived"`
-	Properties     map[string]any         `json:"properties"`
+	ID             string         `json:"id"`
+	Object         string         `json:"object"`
+	CreatedTime    string         `json:"created_time"`
+	LastEditedTime string         `json:"last_edited_time"`
+	Archived       bool           `json:"archived"`
+	Properties     map[string]any `json:"properties"`
 
 	http    *notionhttp.Client
 	pending []any
@@ -46,13 +45,16 @@ func (p *Page) Content(ctx context.Context) (string, error) {
 }
 
 func (p *Page) Append(md string) {
-	parser := markdown.NewLineParser()
-	for _, line := range strings.Split(md, "\n") {
-		block, ok := parser.Parse(line)
-		if ok {
-			p.pending = append(p.pending, block)
-		}
+	_ = p.AppendMarkdown(md)
+}
+
+func (p *Page) AppendMarkdown(md string) error {
+	parsed, err := markdown.Parse(md)
+	if err != nil {
+		return err
 	}
+	p.pending = append(p.pending, parsed...)
+	return nil
 }
 
 func (p *Page) Commit(ctx context.Context) error {

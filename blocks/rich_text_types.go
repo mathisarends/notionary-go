@@ -31,3 +31,11 @@ type RichText struct {
 	PlainText   string       `json:"plain_text"`
 	Href        *string      `json:"href,omitempty"`
 }
+
+func RichTextFromPlainText(text string) RichText {
+	return RichText{
+		Type:      RichTextTypeText,
+		Text:      &TextContent{Content: text},
+		PlainText: text,
+	}
+}
