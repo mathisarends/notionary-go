@@ -70,10 +70,10 @@ func ChunkByColor(richTexts []blocks.RichText) []ColorGroup {
 }
 
 func extractColor(rt blocks.RichText) blocks.BlockColor {
-	if rt.Annotations != nil {
-		return rt.Annotations.Color
-	}
-	return blocks.BlockColorDefault
+    if rt.Annotations == nil || rt.Annotations.Color == "" {
+        return blocks.BlockColorDefault
+    }
+    return rt.Annotations.Color
 }
 
 func parseColor(raw string) blocks.BlockColor {
