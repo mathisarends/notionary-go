@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	notionhttp "github.com/mathisbot/notionary-go/http"
-	"github.com/mathisbot/notionary-go/shared"
+	search "github.com/mathisbot/notionary-go/search"
 )
 
 type Client struct {
@@ -21,7 +21,6 @@ func (c *Client) Get(ctx context.Context, id string) (*Page, error) {
 	if err := c.http.Get(ctx, "/pages/"+id, &page); err != nil {
 		return nil, err
 	}
-	page.http = c.http
 	return &page, nil
 }
 
@@ -29,10 +28,10 @@ func (c *Client) FindByTitle(ctx context.Context, title string) (*Page, error) {
 	var cursor string
 
 	for {
-		var resp shared.SearchResponse
-		err := c.http.Post(ctx, "/search", shared.SearchRequest{
+		var resp search.SearchResponse
+		err := c.http.Post(ctx, "/search", search.SearchRequest{
 			Query:       title,
-			Filter:      &shared.SearchFilter{Value: "page", Property: "object"},
+			Filter:      &search.SearchFilter{Value: "page", Property: "object"},
 			StartCursor: cursor,
 		}, &resp)
 		if err != nil {
@@ -52,4 +51,47 @@ func (c *Client) FindByTitle(ctx context.Context, title string) (*Page, error) {
 	}
 
 	return nil, fmt.Errorf("page %q not found", title)
+}
+
+func (c *Client) Stream(ctx context.Context, config search.WorkspaceQueryConfig) (<-chan *Page, <-chan error) {
+	pages := make(chan *Page)
+	errc := make(chan error, 1)
+
+	config = config.WithPagesOnly()
+
+	go func() {
+		defer close(pages)
+		defer close(errc)
+
+		var cursor string
+		for {
+			var resp search.SearchResponse
+			err := c.http.Post(ctx, "/search", config.WithStartCursor(cursor).ToAPIParams(), &resp)
+			if err != nil {
+				errc <- err
+				return
+			}
+
+			for _, result := range resp.Results {
+				page, err := c.Get(ctx, result.ID)
+				if err != nil {
+					errc <- err
+					return
+				}
+				select {
+				case pages <- page:
+				case <-ctx.Done():
+					errc <- ctx.Err()
+					return
+				}
+			}
+
+			if !resp.HasMore {
+				return
+			}
+			cursor = resp.NextCursor
+		}
+	}()
+
+	return pages, errc
 }

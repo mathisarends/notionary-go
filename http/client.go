@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
 )
 
@@ -50,6 +51,69 @@ func (c *Client) Patch(ctx context.Context, path string, body, out any) error {
 
 func (c *Client) Delete(ctx context.Context, path string, out any) error {
 	return c.do(ctx, http.MethodDelete, path, nil, out)
+}
+
+func (c *Client) PostMultipart(
+	ctx context.Context,
+	path string,
+	fileField string,
+	filename string,
+	fileContent []byte,
+	fields map[string]string,
+	out any,
+) error {
+	var body bytes.Buffer
+	writer := multipart.NewWriter(&body)
+
+	if fileField != "" {
+		part, err := writer.CreateFormFile(fileField, filename)
+		if err != nil {
+			return fmt.Errorf("create multipart file part: %w", err)
+		}
+		if _, err := part.Write(fileContent); err != nil {
+			return fmt.Errorf("write multipart file part: %w", err)
+		}
+	}
+
+	for key, value := range fields {
+		if err := writer.WriteField(key, value); err != nil {
+			return fmt.Errorf("write multipart field %q: %w", key, err)
+		}
+	}
+
+	if err := writer.Close(); err != nil {
+		return fmt.Errorf("close multipart writer: %w", err)
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, baseURL+path, &body)
+	if err != nil {
+		return fmt.Errorf("create request: %w", err)
+	}
+
+	req.Header.Set("Authorization", "Bearer "+c.token)
+	req.Header.Set("Notion-Version", notionVersion)
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("do request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 400 {
+		var apiErr APIError
+		json.NewDecoder(resp.Body).Decode(&apiErr)
+		apiErr.Status = resp.StatusCode
+		return &apiErr
+	}
+
+	if out != nil {
+		if err := json.NewDecoder(resp.Body).Decode(out); err != nil {
+			return fmt.Errorf("decode response: %w", err)
+		}
+	}
+
+	return nil
 }
 
 func (c *Client) do(ctx context.Context, method, path string, body, out any) error {
