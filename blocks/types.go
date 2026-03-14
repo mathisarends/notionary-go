@@ -6,6 +6,7 @@ type BlockType string
 
 const (
 	BlockTypeParagraph        BlockType = "paragraph"
+	BlockTypeHeading          BlockType = "heading"
 	BlockTypeHeading1         BlockType = "heading_1"
 	BlockTypeHeading2         BlockType = "heading_2"
 	BlockTypeHeading3         BlockType = "heading_3"
@@ -21,6 +22,7 @@ const (
 	BlockTypeVideo            BlockType = "video"
 	BlockTypeAudio            BlockType = "audio"
 	BlockTypeFile             BlockType = "file"
+	BlockTypePDF              BlockType = "pdf"
 	BlockTypePdf              BlockType = "pdf"
 	BlockTypeBookmark         BlockType = "bookmark"
 	BlockTypeEmbed            BlockType = "embed"
@@ -33,6 +35,7 @@ const (
 	BlockTypeChildPage        BlockType = "child_page"
 	BlockTypeChildDatabase    BlockType = "child_database"
 	BlockTypeSyncedBlock      BlockType = "synced_block"
+	BlockTypeToggleableHeading BlockType = "toggleable_heading"
 	BlockTypeLinkPreview      BlockType = "link_preview"
 	BlockTypeLinkToPage       BlockType = "link_to_page"
 	BlockTypeBreadcrumb       BlockType = "breadcrumb"

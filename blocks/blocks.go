@@ -18,7 +18,17 @@ func (b *ParagraphBlock) RichTextRefs() []*[]RichText {
 type HeadingData struct {
 	RichText     []RichText `json:"rich_text"`
 	Color        BlockColor `json:"color"`
+	Level        int        `json:"level,omitempty"`
 	IsToggleable bool       `json:"is_toggleable"`
+}
+
+type HeadingBlock struct {
+	BaseBlock
+	Heading HeadingData `json:"heading"`
+}
+
+func (b *HeadingBlock) RichTextRefs() []*[]RichText {
+	return []*[]RichText{&b.Heading.RichText}
 }
 
 type Heading1Block struct {
@@ -102,6 +112,7 @@ func (b *QuoteBlock) RichTextRefs() []*[]RichText {
 
 type CalloutData struct {
 	RichText []RichText `json:"rich_text"`
+	Emoji    string     `json:"emoji,omitempty"`
 	Color    BlockColor `json:"color"`
 }
 
@@ -116,6 +127,7 @@ func (b *CalloutBlock) RichTextRefs() []*[]RichText {
 
 type ToggleData struct {
 	RichText []RichText `json:"rich_text"`
+	Title    []RichText `json:"title,omitempty"`
 	Color    BlockColor `json:"color"`
 }
 
@@ -125,7 +137,7 @@ type ToggleBlock struct {
 }
 
 func (b *ToggleBlock) RichTextRefs() []*[]RichText {
-	return []*[]RichText{&b.Toggle.RichText}
+	return []*[]RichText{&b.Toggle.RichText, &b.Toggle.Title}
 }
 
 type ToDoData struct {
@@ -151,6 +163,7 @@ type DividerBlock struct {
 type FileData struct {
 	Type     string `json:"type"` // "external" | "file"
 	URL      string `json:"url,omitempty"`
+	Name     string `json:"name,omitempty"`
 	External *struct {
 		URL string `json:"url"`
 	} `json:"external,omitempty"`
@@ -179,6 +192,70 @@ func (b *VideoBlock) RichTextRefs() []*[]RichText {
 	return []*[]RichText{&b.Video.Caption}
 }
 
+type AudioBlock struct {
+	BaseBlock
+	Audio FileData `json:"audio"`
+}
+
+func (b *AudioBlock) RichTextRefs() []*[]RichText {
+	return []*[]RichText{&b.Audio.Caption}
+}
+
+type FileBlock struct {
+	BaseBlock
+	File FileData `json:"file"`
+}
+
+func (b *FileBlock) RichTextRefs() []*[]RichText {
+	return []*[]RichText{&b.File.Caption}
+}
+
+type PDFBlock struct {
+	BaseBlock
+	PDF FileData `json:"pdf"`
+}
+
+func (b *PDFBlock) RichTextRefs() []*[]RichText {
+	return []*[]RichText{&b.PDF.Caption}
+}
+
+type BookmarkData struct {
+	URL   string     `json:"url"`
+	Title []RichText `json:"title"`
+}
+
+type BookmarkBlock struct {
+	BaseBlock
+	Bookmark BookmarkData `json:"bookmark"`
+}
+
+func (b *BookmarkBlock) RichTextRefs() []*[]RichText {
+	return []*[]RichText{&b.Bookmark.Title}
+}
+
+type EmbedData struct {
+	URL   string     `json:"url"`
+	Title []RichText `json:"title"`
+}
+
+type EmbedBlock struct {
+	BaseBlock
+	Embed EmbedData `json:"embed"`
+}
+
+func (b *EmbedBlock) RichTextRefs() []*[]RichText {
+	return []*[]RichText{&b.Embed.Title}
+}
+
+type EquationData struct {
+	Expression string `json:"expression,omitempty"`
+}
+
+type EquationBlock struct {
+	BaseBlock
+	Equation EquationData `json:"equation"`
+}
+
 type TableData struct {
 	TableWidth      int  `json:"table_width"`
 	HasColumnHeader bool `json:"has_column_header"`
@@ -190,6 +267,11 @@ type TableBlock struct {
 	Table TableData `json:"table"`
 }
 
+type TableOfContentsBlock struct {
+	BaseBlock
+	TableOfContents struct{} `json:"table_of_contents"`
+}
+
 type TableRowData struct {
 	Cells [][]RichText `json:"cells"`
 }
@@ -197,6 +279,48 @@ type TableRowData struct {
 type TableRowBlock struct {
 	BaseBlock
 	TableRow TableRowData `json:"table_row"`
+}
+
+type ColumnData struct {
+	Ratio string `json:"ratio,omitempty"`
+}
+
+type ColumnListBlock struct {
+	BaseBlock
+	ColumnList struct{} `json:"column_list"`
+}
+
+type ColumnBlock struct {
+	BaseBlock
+	Column ColumnData `json:"column"`
+}
+
+type SyncedBlockData struct {
+	ID string `json:"id,omitempty"`
+}
+
+type SyncedBlock struct {
+	BaseBlock
+	SyncedBlock SyncedBlockData `json:"synced_block"`
+}
+
+type ToggleableHeadingData struct {
+	Title []RichText `json:"title"`
+	Level int        `json:"level"`
+}
+
+type ToggleableHeadingBlock struct {
+	BaseBlock
+	ToggleableHeading ToggleableHeadingData `json:"toggleable_heading"`
+}
+
+func (b *ToggleableHeadingBlock) RichTextRefs() []*[]RichText {
+	return []*[]RichText{&b.ToggleableHeading.Title}
+}
+
+type BreadcrumbBlock struct {
+	BaseBlock
+	Breadcrumb struct{} `json:"breadcrumb"`
 }
 
 type ChildPageBlock struct {

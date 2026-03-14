@@ -5,35 +5,23 @@ import (
 	syntax "github.com/mathisbot/notionary-go/blocks/markdown/syntax"
 )
 
-type AudioCodec struct{}
+type ParagraphCodec struct{}
 
-func (c *AudioCodec) Parse(line string) (blocks.Block, bool) {
-	syn, ok := syntax.Registry[syntax.Audio].(syntax.SelfClosingTagSyntax)
-	if !ok {
-		return nil, false
-	}
-	m := syn.Pattern.FindStringSubmatch(line)
-	if m == nil {
-		return nil, false
-	}
-	return &blocks.AudioBlock{
-		BaseBlock: blocks.BaseBlock{Type: blocks.BlockTypeAudio},
-		Audio: blocks.FileData{
-			URL:     m[1],
-			Caption: toRichText(m[2]),
+func (c *ParagraphCodec) Parse(line string) (blocks.Block, bool) {
+	return &blocks.ParagraphBlock{
+		BaseBlock: blocks.BaseBlock{Type: blocks.BlockTypeParagraph},
+		Paragraph: blocks.ParagraphData{
+			RichText: toRichText(line),
+			Color:    blocks.BlockColorDefault,
 		},
 	}, true
 }
 
-func (c *AudioCodec) Render(block blocks.Block) (string, bool) {
-	b, ok := block.(*blocks.AudioBlock)
+func (c *ParagraphCodec) Render(block blocks.Block) (string, bool) {
+	b, ok := block.(*blocks.ParagraphBlock)
 	if !ok {
 		return "", false
 	}
-	result := `<audio src="` + b.Audio.URL + `"`
-	if caption := toMarkdown(b.Audio.Caption); caption != "" {
-		result += ` caption="` + caption + `"`
-	}
-	result += ">"
-	return result, true
+	_ = syntax.Registry[syntax.Paragraph]
+	return toMarkdown(b.Paragraph.RichText), true
 }
