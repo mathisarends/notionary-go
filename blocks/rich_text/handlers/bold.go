@@ -12,6 +12,16 @@ type BoldHandler struct{}
 
 func (BoldHandler) Tag() string { return "**" }
 
+func BoldToMarkdown(text, wrapper string) string {
+	if text == "" {
+		return ""
+	}
+	if wrapper == "" {
+		wrapper = "**"
+	}
+	return wrapper + text + wrapper
+}
+
 func (BoldHandler) Handle(match []string) blocks.RichText {
 	return blocks.RichText{
 		Type:        blocks.RichTextTypeText,

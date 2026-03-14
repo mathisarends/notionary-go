@@ -10,6 +10,9 @@ type Grammar struct {
 	LinkPrefix            string
 	LinkMiddle            string
 	LinkSuffix            string
+	ColorPrefix           string
+	ColorMiddle           string
+	ColorSuffix           string
 }
 
 func DefaultGrammar() Grammar {
@@ -23,5 +26,8 @@ func DefaultGrammar() Grammar {
 		LinkPrefix:            "[",
 		LinkMiddle:            "](",
 		LinkSuffix:            ")",
+		ColorPrefix:           "{color:",
+		ColorMiddle:           "}",
+		ColorSuffix:           "{/color}",
 	}
 }
