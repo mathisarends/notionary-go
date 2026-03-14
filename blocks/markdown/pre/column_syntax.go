@@ -1,19 +1,17 @@
-package preprocessor
+package pre
 
 import (
 	"fmt"
 	"math"
-	"regexp"
 	"strings"
+
+	markdown "github.com/mathisbot/notionary-go/blocks/markdown"
 )
 
 const (
-	columnListDelimiter = "::: columns"
-	ratioTolerance      = 0.0001
-	minimumColumns      = 2
+	ratioTolerance = 0.0001
+	minimumColumns = 2
 )
-
-var columnPattern = regexp.MustCompile(`:::\s+column(?:\s+([\d.]+))?`)
 
 type InsufficientColumnsError struct {
 	Count int
@@ -32,14 +30,28 @@ func (e *InvalidColumnRatioSumError) Error() string {
 	return fmt.Sprintf("column ratios must sum to 1.0 (±%.4f), but sum to %.4f", e.Tolerance, e.Sum)
 }
 
-type ColumnSyntaxPreProcessor struct{}
+func mustTagSyntax(key markdown.RegistryKey) markdown.TagSyntax {
+	def, ok := markdown.Registry[key].(markdown.TagSyntax)
+	if !ok {
+		panic(fmt.Sprintf("syntax: %q is not a TagSyntax", key))
+	}
+	return def
+}
+
+type ColumnSyntaxPreProcessor struct {
+	columnList markdown.TagSyntax
+	column     markdown.TagSyntax
+}
 
 func NewColumnSyntaxPreProcessor() *ColumnSyntaxPreProcessor {
-	return &ColumnSyntaxPreProcessor{}
+	return &ColumnSyntaxPreProcessor{
+		columnList: mustTagSyntax(markdown.ColumnList),
+		column:     mustTagSyntax(markdown.Column),
+	}
 }
 
 func (p *ColumnSyntaxPreProcessor) Process(markdownText string) (string, error) {
-	if !strings.Contains(markdownText, columnListDelimiter) {
+	if !strings.Contains(markdownText, p.columnList.OpenTag) {
 		return markdownText, nil
 	}
 
@@ -51,8 +63,7 @@ func (p *ColumnSyntaxPreProcessor) Process(markdownText string) (string, error) 
 }
 
 func (p *ColumnSyntaxPreProcessor) validateAllColumnLists(markdownText string) error {
-	blocks := p.extractColumnListBlocks(markdownText)
-	for _, block := range blocks {
+	for _, block := range p.extractColumnListBlocks(markdownText) {
 		if err := p.validateColumnListBlock(block); err != nil {
 			return err
 		}
@@ -65,61 +76,39 @@ func (p *ColumnSyntaxPreProcessor) extractColumnListBlocks(markdownText string) 
 	var blocks []string
 
 	for i, line := range lines {
-		if strings.TrimSpace(line) == columnListDelimiter {
-			block := p.extractIndentedBlock(lines, i+1)
-			blocks = append(blocks, block)
+		if p.columnList.Pattern.MatchString(strings.TrimSpace(line)) {
+			blocks = append(blocks, p.extractUntilClosingTag(lines, i+1))
 		}
 	}
 
 	return blocks
 }
 
-func (p *ColumnSyntaxPreProcessor) extractIndentedBlock(lines []string, startIndex int) string {
-	if startIndex >= len(lines) {
-		return ""
-	}
-
-	baseLevel := indentationLevel(lines[startIndex])
-	baseSpaces := baseLevel * spacesPerNestingLevel
+func (p *ColumnSyntaxPreProcessor) extractUntilClosingTag(lines []string, startIndex int) string {
 	var blockLines []string
-
 	for _, line := range lines[startIndex:] {
-		if strings.TrimSpace(line) == "" {
-			blockLines = append(blockLines, line)
-			continue
-		}
-
-		currentLevel := indentationLevel(line)
-		if currentLevel < baseLevel {
+		if p.columnList.EndPattern.MatchString(strings.TrimSpace(line)) {
 			break
 		}
-
-		if len(line) >= baseSpaces {
-			blockLines = append(blockLines, line[baseSpaces:])
-		} else {
-			blockLines = append(blockLines, line)
-		}
+		blockLines = append(blockLines, line)
 	}
-
 	return strings.Join(blockLines, "\n")
 }
 
 func (p *ColumnSyntaxPreProcessor) validateColumnListBlock(blockContent string) error {
-	matches := columnPattern.FindAllStringSubmatch(blockContent, -1)
-	columnCount := len(matches)
+	matches := p.column.Pattern.FindAllStringSubmatch(blockContent, -1)
 
-	if columnCount < minimumColumns {
-		return &InsufficientColumnsError{Count: columnCount}
+	if len(matches) < minimumColumns {
+		return &InsufficientColumnsError{Count: len(matches)}
 	}
 
-	ratios := p.extractColumnRatios(matches)
-	return p.validateRatioSum(ratios, columnCount)
+	return p.validateRatioSum(p.extractColumnRatios(matches), len(matches))
 }
 
 func (p *ColumnSyntaxPreProcessor) extractColumnRatios(matches [][]string) []float64 {
 	var ratios []float64
 	for _, match := range matches {
-		if len(match) > 1 && match[1] != "" && match[1] != "1" {
+		if len(match) > 1 && match[1] != "" {
 			var ratio float64
 			fmt.Sscanf(match[1], "%f", &ratio)
 			ratios = append(ratios, ratio)
@@ -143,9 +132,4 @@ func (p *ColumnSyntaxPreProcessor) validateRatioSum(ratios []float64, columnCoun
 	}
 
 	return nil
-}
-
-func indentationLevel(line string) int {
-	leading := len(line) - len(strings.TrimLeft(line, " \t"))
-	return leading / spacesPerNestingLevel
 }

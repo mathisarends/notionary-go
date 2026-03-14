@@ -1,4 +1,4 @@
-package preprocessor
+package pre
 
 func CreateMarkdownToRichTextPreProcessor() *MarkdownPreProcessor {
 	p := NewMarkdownPreProcessor()

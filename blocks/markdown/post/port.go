@@ -1,4 +1,4 @@
-package postprocessor
+package post
 
 import (
 	blocks "github.com/mathisbot/notionary-go/blocks"

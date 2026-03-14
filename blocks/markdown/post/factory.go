@@ -1,4 +1,4 @@
-package postprocessor
+package post
 
 func CreateMarkdownToRichTextPostProcessor() *BlockPostProcessor {
 	p := NewBlockPostProcessor()
