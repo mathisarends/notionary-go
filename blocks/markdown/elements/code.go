@@ -7,7 +7,6 @@ import (
 
 type CodeCodec struct{}
 
-// TODO: Sollte auf ``` markdown syntax ausgetauscht werden
 func (c *CodeCodec) Parse(line string) (blocks.Block, bool) {
 	syn, ok := syntax.Registry[syntax.Code].(syntax.TagSyntax)
 	if !ok {
@@ -36,8 +35,7 @@ func (c *CodeCodec) Render(block blocks.Block) (string, bool) {
 	}
 	result := syn.OpenTag
 	if b.Code.Language != "" {
-		result += ` lang="` + b.Code.Language + `"`
+		result += b.Code.Language
 	}
-	result += ">"
 	return result, true
 }

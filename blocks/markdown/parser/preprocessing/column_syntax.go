@@ -5,7 +5,7 @@ import (
 	"math"
 	"strings"
 
-	markdown "github.com/mathisbot/notionary-go/blocks/markdown"
+	"github.com/mathisbot/notionary-go/blocks/markdown/syntax"
 )
 
 const (
@@ -30,8 +30,8 @@ func (e *InvalidColumnRatioSumError) Error() string {
 	return fmt.Sprintf("column ratios must sum to 1.0 (±%.4f), but sum to %.4f", e.Tolerance, e.Sum)
 }
 
-func mustTagSyntax(key markdown.RegistryKey) markdown.TagSyntax {
-	def, ok := markdown.Registry[key].(markdown.TagSyntax)
+func mustTagSyntax(key syntax.RegistryKey) syntax.TagSyntax {
+	def, ok := syntax.Registry[key].(syntax.TagSyntax)
 	if !ok {
 		panic(fmt.Sprintf("syntax: %q is not a TagSyntax", key))
 	}
@@ -39,14 +39,14 @@ func mustTagSyntax(key markdown.RegistryKey) markdown.TagSyntax {
 }
 
 type ColumnSyntaxPreProcessor struct {
-	columnList markdown.TagSyntax
-	column     markdown.TagSyntax
+	columnList syntax.TagSyntax
+	column     syntax.TagSyntax
 }
 
 func NewColumnSyntaxPreProcessor() *ColumnSyntaxPreProcessor {
 	return &ColumnSyntaxPreProcessor{
-		columnList: mustTagSyntax(markdown.ColumnList),
-		column:     mustTagSyntax(markdown.Column),
+		columnList: mustTagSyntax(syntax.ColumnList),
+		column:     mustTagSyntax(syntax.Column),
 	}
 }
 

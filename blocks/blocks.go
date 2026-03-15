@@ -340,3 +340,8 @@ type ChildDatabaseBlock struct {
 type UnsupportedBlock struct {
 	BaseBlock
 }
+
+type BlockWithChildren interface {
+	Block
+	Children() []Block
+}

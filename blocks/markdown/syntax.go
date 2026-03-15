@@ -123,9 +123,9 @@ var Registry = map[RegistryKey]Definition{
 		Example: "<toggle title=\"Section Title\" level=\"2\">\nContent under the heading toggle.\n</toggle>",
 	},
 	Code: TagSyntax{
-		OpenTag: "<code", CloseTag: "</code>",
-		Pattern: regexp.MustCompile(`^<code(?:\s+lang="([^"]*)")?>\s*$`), EndPattern: regexp.MustCompile(`^</code>\s*$`),
-		Group: "Containers", Example: "<code lang=\"python\">\nprint(\"hello\")\n</code>",
+		OpenTag: "```", CloseTag: "```",
+		Pattern: regexp.MustCompile("^\\s*```([^`\\s]*)\\s*$"), EndPattern: regexp.MustCompile("^\\s*```\\s*$"),
+		Group: "Containers", Example: "```python\nprint(\"hello\")\n```",
 	},
 	Equation: TagSyntax{
 		OpenTag: "<equation>", CloseTag: "</equation>",
@@ -185,9 +185,9 @@ func SyntaxGuide() string {
 		}
 
 		b.WriteString("### " + string(key) + "\n")
-		b.WriteString("```\n")
+		b.WriteString("````\n")
 		b.WriteString(example)
-		b.WriteString("\n```\n\n")
+		b.WriteString("\n````\n\n")
 	}
 
 	return b.String()

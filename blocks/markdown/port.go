@@ -1,13 +1,10 @@
 package markdown
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/mathisbot/notionary-go/blocks"
-	elements "github.com/mathisbot/notionary-go/blocks/markdown/elements"
-	post "github.com/mathisbot/notionary-go/blocks/markdown/parser/postprocessing"
-	postprocessor "github.com/mathisbot/notionary-go/blocks/markdown/renderer/postprecessor"
+	"github.com/mathisbot/notionary-go/blocks/markdown/parser"
+	"github.com/mathisbot/notionary-go/blocks/markdown/renderer"
+	postprocessor "github.com/mathisbot/notionary-go/blocks/markdown/renderer/postprocessor"
 )
 
 type Port interface {
@@ -16,21 +13,18 @@ type Port interface {
 }
 
 type Converter struct {
-	lineParser     elements.Parser
-	postProcessor  *post.BlockPostProcessor
+	parser         *parser.Parser
+	renderer       *renderer.Renderer
 	renderPipeline *postprocessor.Pipeline
 }
 
 func NewConverter() *Converter {
+	pipeline := postprocessor.NewMarkdownRenderingPipeline()
 	return &Converter{
-		lineParser:     newLineParserFromRegistry(),
-		postProcessor:  post.CreateMarkdownToRichTextPostProcessor(),
-		renderPipeline: postprocessor.NewMarkdownRenderingPipeline(),
+		parser:         parser.NewDefault(),
+		renderer:       renderer.NewDefault(pipeline),
+		renderPipeline: pipeline,
 	}
-}
-
-func NewLineParser() elements.Parser {
-	return newLineParserFromRegistry()
 }
 
 func Parse(markdownText string) ([]any, error) {
@@ -42,54 +36,33 @@ func Render(blocksToRender []blocks.Block) string {
 }
 
 func (c *Converter) ToBlocks(markdownText string) ([]any, error) {
-	if strings.TrimSpace(markdownText) == "" {
+	if c.parser == nil {
 		return nil, nil
 	}
 
-	lines := strings.Split(markdownText, "\n")
-	parsed := make([]any, 0, len(lines))
-	providers := make([]blocks.RichTextProvider, 0, len(lines))
-
-	for _, line := range lines {
-		if strings.TrimSpace(line) == "" {
-			continue
-		}
-		block, ok := c.lineParser.Parse(line)
-		if !ok {
-			continue
-		}
-		parsed = append(parsed, block)
-		if provider, ok := block.(blocks.RichTextProvider); ok {
-			providers = append(providers, provider)
-		}
+	parsedBlocks, err := c.parser.Parse(markdownText)
+	if err != nil {
+		return nil, err
 	}
 
-	if len(providers) > 0 {
-		c.postProcessor.Process(providers)
+	parsed := make([]any, 0, len(parsedBlocks))
+	for _, block := range parsedBlocks {
+		parsed = append(parsed, block)
 	}
 
 	return parsed, nil
 }
 
 func (c *Converter) ToMarkdown(blocksToRender []blocks.Block) string {
-	rendered := elements.Render(blocksToRender)
+	if c.renderer == nil {
+		return ""
+	}
+	rendered, err := c.renderer.Render(blocksToRender, 0)
+	if err != nil {
+		return ""
+	}
+	if c.renderPipeline == nil {
+		return rendered
+	}
 	return c.renderPipeline.Process(rendered)
-}
-
-func newLineParserFromRegistry() elements.Parser {
-	bulleted := mustSimpleSyntax(BulletedList)
-	numbered := mustSimpleSyntax(NumberedList)
-	return elements.NewLineParserWithPatterns(bulleted.Pattern, numbered.Pattern)
-}
-
-func mustSimpleSyntax(key RegistryKey) SimpleSyntax {
-	def, ok := Registry[key]
-	if !ok {
-		panic(fmt.Sprintf("syntax registry entry missing for key: %s", key))
-	}
-	syntax, ok := def.(SimpleSyntax)
-	if !ok {
-		panic(fmt.Sprintf("syntax registry entry %s is not SimpleSyntax", key))
-	}
-	return syntax
 }
