@@ -1,7 +1,7 @@
 package elements
 
 import (
-    "strings"
+	"strings"
 
 	"github.com/mathisbot/notionary-go/blocks"
 	syntax "github.com/mathisbot/notionary-go/blocks/markdown/syntax"

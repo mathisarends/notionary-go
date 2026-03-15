@@ -83,33 +83,8 @@ func UnmarshalBlock(data []byte) (Block, error) {
 	return block, nil
 }
 
-// BlockList für API responses mit custom unmarshaling
 type BlockList struct {
 	Results    []Block `json:"results"`
 	HasMore    bool    `json:"has_more"`
 	NextCursor *string `json:"next_cursor"`
-}
-
-func (bl *BlockList) UnmarshalJSON(data []byte) error {
-	var raw struct {
-		Results    []json.RawMessage `json:"results"`
-		HasMore    bool              `json:"has_more"`
-		NextCursor *string           `json:"next_cursor"`
-	}
-	if err := json.Unmarshal(data, &raw); err != nil {
-		return err
-	}
-
-	bl.HasMore = raw.HasMore
-	bl.NextCursor = raw.NextCursor
-	bl.Results = make([]Block, 0, len(raw.Results))
-
-	for _, r := range raw.Results {
-		block, err := UnmarshalBlock(r)
-		if err != nil {
-			return err
-		}
-		bl.Results = append(bl.Results, block)
-	}
-	return nil
 }
