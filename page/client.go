@@ -17,11 +17,11 @@ func New(http *notionhttp.Client) *Client {
 }
 
 func (c *Client) Get(ctx context.Context, id string) (*Page, error) {
-	var page Page
-	if err := c.http.Get(ctx, "/pages/"+id, &page); err != nil {
+	var dto pageResponseDTO
+	if err := c.http.Get(ctx, "/pages/"+id, &dto); err != nil {
 		return nil, err
 	}
-	return &page, nil
+	return newPageFromDTO(dto, c.http), nil
 }
 
 func (c *Client) FindByTitle(ctx context.Context, title string) (*Page, error) {

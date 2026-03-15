@@ -127,3 +127,8 @@ func NewBot(dto BotUserResponseDto) Bot {
 		OwnerType:     ownerType,
 	}
 }
+
+type PartialUser struct {
+	Object string `json:"object"` // always "user"
+	ID     string `json:"id"`
+}

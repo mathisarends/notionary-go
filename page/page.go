@@ -7,13 +7,13 @@ import (
 	"github.com/mathisbot/notionary-go/blocks"
 	"github.com/mathisbot/notionary-go/blocks/markdown"
 	"github.com/mathisbot/notionary-go/comments"
+	"github.com/mathisbot/notionary-go/entity"
 	notionhttp "github.com/mathisbot/notionary-go/http"
 )
 
 type op interface {
 	apply(ctx context.Context, p *Page) error
 }
-
 
 type appendBlocksOp struct {
 	children []any
@@ -34,17 +34,39 @@ type postReplyOp struct {
 	richText     []blocks.RichText
 }
 
+type pageResponseDTO struct {
+	entity.EntityResponseDto
+	Object     string         `json:"object"`
+	Archived   bool           `json:"archived"`
+	Properties map[string]any `json:"properties"`
+}
+
+type pageMetadataClient struct {
+	http   *notionhttp.Client
+	pageID string
+}
+
 type Page struct {
-	ID             string         `json:"id"`
-	Object         string         `json:"object"`
-	CreatedTime    string         `json:"created_time"`
-	LastEditedTime string         `json:"last_edited_time"`
-	Archived       bool           `json:"archived"`
-	Properties     map[string]any `json:"properties"`
+	entity.Entity `json:"-"`
+	Object        string         `json:"object"`
+	Archived      bool           `json:"archived"`
+	Properties    map[string]any `json:"properties"`
 
 	http     *notionhttp.Client
 	comments *comments.Client
 	pending  []op
+}
+
+func newPageFromDTO(dto pageResponseDTO, http *notionhttp.Client) *Page {
+	meta := pageMetadataClient{http: http, pageID: dto.ID}
+	return &Page{
+		Entity:     entity.New(dto.EntityResponseDto, meta, http),
+		Object:     dto.Object,
+		Archived:   dto.Archived,
+		Properties: dto.Properties,
+		http:       http,
+		comments:   comments.New(http),
+	}
 }
 
 func (p *Page) AppendMarkdown(md string) error {
@@ -169,4 +191,85 @@ func (p *Page) fetchAllBlocks(ctx context.Context) ([]blocks.Block, error) {
 		cursor = *resp.NextCursor
 	}
 	return all, nil
+}
+
+func (m pageMetadataClient) PatchEmojiIcon(ctx context.Context, emoji string) (*entity.EntityResponseDto, error) {
+	return m.patch(ctx, map[string]any{
+		"icon": map[string]any{
+			"type":  "emoji",
+			"emoji": emoji,
+		},
+	})
+}
+
+func (m pageMetadataClient) PatchExternalIcon(ctx context.Context, url string) (*entity.EntityResponseDto, error) {
+	return m.patch(ctx, map[string]any{
+		"icon": map[string]any{
+			"type": "external",
+			"external": map[string]any{
+				"url": url,
+			},
+		},
+	})
+}
+
+func (m pageMetadataClient) PatchIconFromFileUpload(ctx context.Context, fileUploadID string) (*entity.EntityResponseDto, error) {
+	return m.patch(ctx, map[string]any{
+		"icon": map[string]any{
+			"type": "file_upload",
+			"file_upload": map[string]any{
+				"id": fileUploadID,
+			},
+		},
+	})
+}
+
+func (m pageMetadataClient) RemoveIcon(ctx context.Context) error {
+	return m.patchEmpty(ctx, map[string]any{"icon": nil})
+}
+
+func (m pageMetadataClient) PatchExternalCover(ctx context.Context, url string) (*entity.EntityResponseDto, error) {
+	return m.patch(ctx, map[string]any{
+		"cover": map[string]any{
+			"type": "external",
+			"external": map[string]any{
+				"url": url,
+			},
+		},
+	})
+}
+
+func (m pageMetadataClient) PatchCoverFromFileUpload(ctx context.Context, fileUploadID string) (*entity.EntityResponseDto, error) {
+	return m.patch(ctx, map[string]any{
+		"cover": map[string]any{
+			"type": "file_upload",
+			"file_upload": map[string]any{
+				"id": fileUploadID,
+			},
+		},
+	})
+}
+
+func (m pageMetadataClient) RemoveCover(ctx context.Context) error {
+	return m.patchEmpty(ctx, map[string]any{"cover": nil})
+}
+
+func (m pageMetadataClient) MoveToTrash(ctx context.Context) (*entity.EntityResponseDto, error) {
+	return m.patch(ctx, map[string]any{"in_trash": true})
+}
+
+func (m pageMetadataClient) RestoreFromTrash(ctx context.Context) (*entity.EntityResponseDto, error) {
+	return m.patch(ctx, map[string]any{"in_trash": false})
+}
+
+func (m pageMetadataClient) patch(ctx context.Context, payload map[string]any) (*entity.EntityResponseDto, error) {
+	var resp pageResponseDTO
+	if err := m.http.Patch(ctx, "/pages/"+m.pageID, payload, &resp); err != nil {
+		return nil, err
+	}
+	return &resp.EntityResponseDto, nil
+}
+
+func (m pageMetadataClient) patchEmpty(ctx context.Context, payload map[string]any) error {
+	return m.http.Patch(ctx, "/pages/"+m.pageID, payload, nil)
 }
